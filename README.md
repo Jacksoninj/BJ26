@@ -16,24 +16,17 @@
 
 前端無建置步驟，GitHub Pages 由 `main` 根目錄提供。可用 `python3 -m http.server` 預覽。
 
-後端採兩個分開的 Sites：
+後端使用獨立的 Sites Worker 與 D1 資料庫：
 
-1. 公開的 submission gateway 只允許 `/api/submit` 的 POST／OPTIONS。它不能查詢回答。來源位於 `submission-gateway/worker.js`。
-2. owner-private 回答服務使用 D1 持久儲存；`/api/responses` 和 `/admin` 均額外在伺服器核對擁有人身分。來源及 migration 位於 `backend/`。
+- `/api/submit` 可供訪客匿名 POST 問卷，伺服器驗證資料格式、來源及提交次數。
+- `/api/responses` 及 `/admin` 在伺服器核對擁有人帳戶，其他訪客收到 403，無法讀取回答。
+- 管理後台：https://bj26-travel-responses.lghplot.chatgpt.site/admin
 
-管理後台：https://bj26-travel-responses.lghplot.chatgpt.site/admin
+使用者已明確授權公開服務接受匿名提交，回答仍限本人查看。訪客頁面及填寫問卷毋須登入；擁有人後台使用 ChatGPT 帳戶登入。
 
-公開入口：https://bj26-public-submit.lghplot.chatgpt.site
+來源及 migration 位於 `backend/`。Runtime 設定為 D1 binding `DB`、secret `OWNER_EMAIL`，未在 GitHub 儲存秘密值或回答。瀏覽器儲存只用於本機草稿及行程；問卷按下提交並收到確認後才算儲存至資料庫。
 
-私人後台需要擁有人帳戶登入，訪客頁面及填寫問卷不用登入。網站沒有把回答存進公開 GitHub、Issues 或瀏覽器作為雲端儲存。瀏覽器儲存只用於本機草稿及行程。
-
-## 環境設定（不含秘密值）
-
-- 私人服務：D1 binding `DB`、secret `OWNER_EMAIL`。
-- 公開入口：secret `PRIVATE_SERVICE_TOKEN`，只能在伺服器使用。此 token 不在 GitHub 或前端。
-- 私人服務 schema：依次執行 `0000_responses.sql` 及 `0001_preferences.sql`。
-
-重新部署 Sites 時使用對應原有 project，保留私人回答服務的 owner-only 存取設定。來源副本不包含 Site 憑證、使用者回答或私人帳戶資料。
+`submission-gateway/` 保留只寫入的獨立入口原始碼備用；此入口未成功發布，現行前端直接使用上述已上線服務。
 
 ## 驗證
 

@@ -9,3 +9,6 @@ const {relocateStop,distanceKm}=await import('../planner.js');
 test('Move across days and time, insert before a target, without losing stop duration',()=>{const p=defaultPlan(),s=p[2][0],uid=s.uid;relocateStop(p,{uid,day:5,slot:'下午',beforeUid:p[5][1].uid});assert.equal(p[2].some(s=>s.uid===uid),false);assert.equal(p[5][1].uid,uid);assert.equal(p[5][1].duration,180);assert.equal(p[5][1].slot,'下午');assert.equal(p.flat().filter(s=>s.uid===uid).length,1)});
 test('Reject duplicate destination for same day',()=>{const p=defaultPlan();assert.throws(()=>relocateStop(p,{id:'palace',day:3,slot:'下午'}));assert.ok(validatePlan(p))});
 test('Geographic recommendation distances',()=>{assert.equal(distanceKm(byId.beihai,byId.beihai),0);assert.ok(distanceKm(byId.beihai,byId.shichahai)<distanceKm(byId.beihai,byId.badaling))});
+const {prominentIds,images,areas}=await import('../data.js');
+test('Map shows twenty unique prominent spots, each with a real reference photo',()=>{assert.equal(prominentIds.length,20);assert.equal(new Set(prominentIds).size,20);for(const id of prominentIds){assert.ok(byId[id]);assert.ok(images[id]?.url.startsWith('https://'))}});
+test('All lodging areas have pros, cons and a reference photo',()=>{assert.equal(areas.length,4);for(const a of areas){assert.ok(a.pros.length>=2);assert.ok(a.cons.length>=2);assert.ok(images[a.photo])}});
